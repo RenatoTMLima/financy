@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Search } from "lucide-react";
 import {
   UtensilsCrossed,
@@ -10,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CreateTransaction } from "@/components/CreateTransaction";
 import {
   Select,
   SelectContent,
@@ -321,6 +323,8 @@ const mockTransactions: TransactionRow[] = [
 ];
 
 export function Transactions() {
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="mx-auto max-w-6xl px-6 py-8">
@@ -335,10 +339,16 @@ export function Transactions() {
             type="button"
             className="shrink-0 shadow-sm"
             leftIcon={<span className="text-lg leading-none">+</span>}
+            onClick={() => setCreateModalOpen(true)}
           >
             Nova transação
           </Button>
         </div>
+
+        <CreateTransaction
+          open={createModalOpen}
+          onOpenChange={setCreateModalOpen}
+        />
 
         <div className="mb-6 rounded-xl border border-gray-200 bg-neutral-white p-5 shadow-sm">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

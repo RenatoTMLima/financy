@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   FolderOpen,
   ArrowUpDown,
@@ -11,6 +12,7 @@ import {
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CreateCategory } from "@/components/CreateCategory";
 import { CategorySummaryCard } from "./CategorySummaryCard";
 import { CategoryCard } from "./CategoryCard";
 import type { TagVariant } from "@/components/ui/tag";
@@ -90,6 +92,8 @@ const categories: Array<{
 ];
 
 export function Categories() {
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="mx-auto max-w-6xl px-6 py-8">
@@ -104,10 +108,16 @@ export function Categories() {
             type="button"
             className="shrink-0"
             leftIcon={<span className="text-lg leading-none">+</span>}
+            onClick={() => setCreateModalOpen(true)}
           >
             Nova categoria
           </Button>
         </div>
+
+        <CreateCategory
+          open={createModalOpen}
+          onOpenChange={setCreateModalOpen}
+        />
 
         <section className="mb-8 grid gap-4 sm:grid-cols-3">
           <CategorySummaryCard
