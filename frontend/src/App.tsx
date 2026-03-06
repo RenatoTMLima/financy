@@ -1,6 +1,20 @@
+import { Routes, Route } from "react-router-dom";
+import { Login } from "@/pages/Login";
+import { Register } from "@/pages/Register";
+import { Dashboard } from "@/pages/Dashboard";
+import { Transactions } from "@/pages/Transactions";
+import { Categories } from "@/pages/Categories";
+
 function App() {
-  console.log(import.meta.env.VITE_BACKEND_URL);
-  return <div>Hello World</div>;
+  return (
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/transactions" element={<Transactions />} />
+      <Route path="/categories" element={<Categories />} />
+    </Routes>
+  );
 }
 
 export default App;

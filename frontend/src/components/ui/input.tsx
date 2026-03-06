@@ -17,6 +17,10 @@ const input = tv({
       "pointer-events-none flex shrink-0 items-center justify-center text-gray-400 transition-colors",
       "pl-3 group-focus-within/input:text-brand-base",
     ],
+    rightIcon: [
+      "flex shrink-0 items-center justify-center pr-3 text-gray-400 transition-colors",
+      "group-focus-within/input:text-brand-base [&>button]:cursor-pointer",
+    ],
     input: [
       "flex h-10 w-full rounded-md bg-transparent px-3 py-2 text-sm text-gray-800 transition-colors",
       "placeholder:text-gray-400",
@@ -55,11 +59,18 @@ const input = tv({
         input: "pl-3",
       },
     },
+    hasRightIcon: {
+      true: {
+        input: "pr-0",
+      },
+      false: {},
+    },
   },
   defaultVariants: {
     error: false,
     disabled: false,
     hasLeftIcon: false,
+    hasRightIcon: false,
   },
 },
 { twMerge: true }
@@ -71,6 +82,7 @@ export interface InputProps
   helperText?: string;
   error?: boolean;
   leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
   inputClassName?: string;
 }
 
@@ -83,6 +95,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       helperText,
       error = false,
       leftIcon,
+      rightIcon,
       id: idProp,
       disabled,
       ...props
@@ -95,6 +108,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       error,
       disabled: !!disabled,
       hasLeftIcon: !!leftIcon,
+      hasRightIcon: !!rightIcon,
     });
 
     return (
@@ -122,6 +136,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             className={cn(styles.input(), inputClassName)}
             {...props}
           />
+          {rightIcon && (
+            <span className={styles.rightIcon()} aria-hidden>
+              {rightIcon}
+            </span>
+          )}
         </div>
         {helperText && (
           <p id={`${inputId}-helper`} className={styles.helper()}>
