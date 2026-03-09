@@ -50,8 +50,8 @@ export class CategoryResolver {
   }
 
   @Query(() => [CategoryModel])
-  async listCategories(): Promise<CategoryModel[]> {
-    return this.categoryService.listCategories();
+  async listCategories(@GqlUser() user: UserModel): Promise<CategoryModel[]> {
+    return this.categoryService.listCategories(user.id);
   }
 
   @FieldResolver(() => UserModel)
@@ -62,7 +62,11 @@ export class CategoryResolver {
   @FieldResolver(() => [TransactionModel])
   async transactions(
     @Root() category: CategoryModel,
+    @GqlUser() user: UserModel,
   ): Promise<TransactionModel[]> {
-    return this.transactionService.listTransactionsByCategory(category.id);
+    return this.transactionService.listTransactionsByCategory(
+      category.id,
+      user.id,
+    );
   }
 }

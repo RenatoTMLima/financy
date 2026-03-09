@@ -1,83 +1,44 @@
 import * as React from "react";
-import { tv } from "tailwind-variants";
-import { X } from "lucide-react";
+import { tv, VariantProps } from "tailwind-variants";
 import { cn } from "@/lib/utils";
+import { CATEGORY_COLORS } from "@/lib/categoryColors";
 
 const tag = tv(
   {
-    base: "inline-flex items-center gap-1 rounded-md px-2.5 py-0.5 text-sm font-medium",
+    base: "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-medium",
     variants: {
+      color: CATEGORY_COLORS.reduce(
+        (acc, color) => ({
+          ...acc,
+          [color.id]: `${color.bg.light} ${color.text.dark}`,
+        }),
+        {} as Record<string, string>,
+      ),
       variant: {
-        default: "bg-gray-100 text-gray-700",
-        brand: "bg-green-light text-brand-dark",
-        success: "bg-green-light text-green-dark",
-        danger: "bg-red-light text-red-dark",
-        blue: "bg-blue-light text-blue-dark",
-        purple: "bg-purple-light text-purple-dark",
-        pink: "bg-pink-light text-pink-dark",
-        red: "bg-red-light text-red-dark",
-        orange: "bg-orange-light text-orange-dark",
-        yellow: "bg-yellow-light text-yellow-dark",
-        green: "bg-green-light text-green-dark",
-      },
-      removable: {
-        true: "pr-1.5",
-        false: "",
+        icon: "p-3 rounded-lg",
+        text: "",
       },
     },
     defaultVariants: {
-      variant: "default",
-      removable: false,
+      variant: "text",
+      color: "blue",
     },
   },
   { twMerge: true },
 );
 
-export type TagVariant =
-  | "default"
-  | "brand"
-  | "success"
-  | "danger"
-  | "blue"
-  | "purple"
-  | "pink"
-  | "red"
-  | "orange"
-  | "yellow"
-  | "green";
-
-export interface TagProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: TagVariant;
-  /** When provided, shows a remove button and calls this on click. */
-  onRemove?: () => void;
-}
+export type TagProps = React.HTMLAttributes<HTMLSpanElement> &
+  VariantProps<typeof tag>;
 
 const Tag = React.forwardRef<HTMLSpanElement, TagProps>(
-  ({ className, variant = "default", onRemove, children, ...props }, ref) => {
+  ({ className, variant, color, children, ...props }, ref) => {
     return (
       <span
         ref={ref}
-        className={cn(tag({ variant, removable: onRemove != null }), className)}
+        className={cn(tag({ variant, color }), className)}
         {...props}
       >
         {children}
-        {onRemove != null && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove();
-            }}
-            className={cn(
-              "inline-flex shrink-0 rounded p-0.5 transition-colors",
-              "hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400",
-              "cursor-pointer touch-manipulation",
-            )}
-            aria-label="Remove tag"
-          >
-            <X className="size-3.5" aria-hidden />
-          </button>
-        )}
       </span>
     );
   },

@@ -53,14 +53,19 @@ export class TransactionService {
     });
   }
 
-  async listTransactions() {
-    return prismaClient.transaction.findMany();
+  async listTransactions(userId: string) {
+    return prismaClient.transaction.findMany({
+      where: {
+        userId,
+      },
+    });
   }
 
-  async listTransactionsByCategory(categoryId: string) {
+  async listTransactionsByCategory(categoryId: string, userId: string) {
     return prismaClient.transaction.findMany({
       where: {
         categoryId,
+        userId,
       },
     });
   }

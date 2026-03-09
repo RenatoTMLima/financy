@@ -51,8 +51,12 @@ export class CategoryService {
     });
   }
 
-  async listCategories() {
-    return prismaClient.category.findMany();
+  async listCategories(userId: string) {
+    return prismaClient.category.findMany({
+      where: {
+        userId,
+      },
+    });
   }
 
   async getCategory(id: string) {

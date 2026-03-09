@@ -1,5 +1,5 @@
-import { prismaClient } from '../../prisma/prisma'
-import { CreateUserInput, UpdateUserInput } from '../dtos/input/user.input'
+import { prismaClient } from "../../prisma/prisma";
+import { CreateUserInput, UpdateUserInput } from "../dtos/input/user.input";
 
 export class UserService {
   async createUser(data: CreateUserInput) {
@@ -7,15 +7,15 @@ export class UserService {
       where: {
         email: data.email,
       },
-    })
-    if (findUser) throw new Error('Usuário já cadastrado!')
+    });
+    if (findUser) throw new Error("Usuário já cadastrado!");
 
     return prismaClient.user.create({
       data: {
         name: data.name,
         email: data.email,
       },
-    })
+    });
   }
 
   async findUser(id: string) {
@@ -23,40 +23,35 @@ export class UserService {
       where: {
         id,
       },
-    })
-    if (!user) throw new Error('Usuário não existe')
-    return user
-  }
-
-  async listUsers() {
-    return prismaClient.user.findMany()
+    });
+    if (!user) throw new Error("Usuário não existe");
+    return user;
   }
 
   async updateUser(id: string, data: UpdateUserInput) {
     const user = await prismaClient.user.findUnique({
       where: { id },
-    })
-    if (!user) throw new Error('Usuário não existe')
+    });
+    if (!user) throw new Error("Usuário não existe");
 
     return prismaClient.user.update({
       where: { id },
       data: {
         name: data.name ?? undefined,
-        role: data.role ?? undefined,
       },
-    })
+    });
   }
 
   async deleteUser(id: string) {
     const user = await prismaClient.user.findUnique({
       where: { id },
-    })
-    if (!user) throw new Error('Usuário não existe')
+    });
+    if (!user) throw new Error("Usuário não existe");
 
     await prismaClient.user.delete({
       where: { id },
-    })
+    });
 
-    return true
+    return true;
   }
 }

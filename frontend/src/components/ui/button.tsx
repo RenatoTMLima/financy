@@ -1,5 +1,5 @@
 import * as React from "react";
-import { tv } from "tailwind-variants";
+import { tv, type VariantProps } from "tailwind-variants";
 import { cn } from "@/lib/utils";
 
 const button = tv(
@@ -19,6 +19,11 @@ const button = tv(
         outline: [
           "border border-gray-300 bg-white text-gray-700",
           "hover:border-gray-400 hover:text-gray-800",
+          "disabled:border-gray-200 disabled:text-gray-400",
+        ],
+        icon: [
+          "border border-gray-300 bg-white text-gray-700",
+          "hover:border-gray-400 hover:text-gray-800 hover:bg-gray-200",
           "disabled:border-gray-200 disabled:text-gray-400",
         ],
         pagination: "h-8 min-w-8 px-2 text-sm",
@@ -59,6 +64,8 @@ const button = tv(
       { variant: "default", size: "sm", class: "h-8 px-3 text-xs" },
       { variant: "outline", size: "md", class: "h-10 px-4 text-sm" },
       { variant: "outline", size: "sm", class: "h-8 px-3 text-xs" },
+      { variant: "icon", size: "md", class: "p-2" },
+      { variant: "icon", size: "sm", class: "p-1.5" },
     ],
     defaultVariants: {
       variant: "default",
@@ -67,17 +74,14 @@ const button = tv(
       disabled: false,
     },
   },
-  { twMerge: true }
+  { twMerge: true },
 );
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "default" | "outline" | "pagination";
-  size?: "md" | "sm";
-  leftIcon?: React.ReactNode;
-  /** When true and variant is "pagination", shows the active (selected page) style. */
-  active?: boolean;
-}
+export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
+  VariantProps<typeof button> & {
+    leftIcon?: React.ReactNode;
+    active?: boolean;
+  };
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
@@ -92,7 +96,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       type = "button",
       ...props
     },
-    ref
+    ref,
   ) => {
     return (
       <button
@@ -107,7 +111,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             active,
             disabled: !!disabled,
           }),
-          className
+          className,
         )}
         {...props}
       >
@@ -116,7 +120,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             className={cn(
               "flex shrink-0 items-center",
               size === "md" && "[&>svg]:size-4",
-              size === "sm" && "[&>svg]:size-3.5"
+              size === "sm" && "[&>svg]:size-3.5",
             )}
           >
             {leftIcon}
@@ -125,7 +129,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {children}
       </button>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";

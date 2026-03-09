@@ -1,17 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
-import {
-  UtensilsCrossed,
-  Fuel,
-  ShoppingCart,
-  Leaf,
-  Home,
-  Briefcase,
-  Film,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CreateTransaction } from "@/components/CreateTransaction";
+import { CreateTransaction } from "@/components/modals/CreateTransaction";
 import {
   Select,
   SelectContent,
@@ -20,318 +11,57 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TransactionsTable } from "./TransactionsTable";
-import type { TransactionRow } from "./TransactionsTable";
-
-const mockTransactions: TransactionRow[] = [
-  {
-    id: "1",
-    icon: <UtensilsCrossed className="size-4" />,
-    iconBgClassName: "bg-blue-base",
-    description: "Jantar no Restaurante",
-    date: "30/11/25",
-    category: "Alimentação",
-    categoryVariant: "blue",
-    type: "saida",
-    amount: -89.5,
-  },
-  {
-    id: "2",
-    icon: <Fuel className="size-4" />,
-    iconBgClassName: "bg-purple-base",
-    description: "Posto de Gasolina",
-    date: "29/11/25",
-    category: "Transporte",
-    categoryVariant: "purple",
-    type: "saida",
-    amount: -150,
-  },
-  {
-    id: "3",
-    icon: <ShoppingCart className="size-4" />,
-    iconBgClassName: "bg-orange-base",
-    description: "Compras no Mercado",
-    date: "28/11/25",
-    category: "Mercado",
-    categoryVariant: "orange",
-    type: "saida",
-    amount: -220.45,
-  },
-  {
-    id: "4",
-    icon: <Leaf className="size-4" />,
-    iconBgClassName: "bg-green-base",
-    description: "Retorno de Investimento",
-    date: "27/11/25",
-    category: "Investimento",
-    categoryVariant: "green",
-    type: "entrada",
-    amount: 340.25,
-  },
-  {
-    id: "5",
-    icon: <Home className="size-4" />,
-    iconBgClassName: "bg-orange-base",
-    description: "Aluguel",
-    date: "25/11/25",
-    category: "Utilidades",
-    categoryVariant: "yellow",
-    type: "saida",
-    amount: -1700,
-  },
-  {
-    id: "6",
-    icon: <Briefcase className="size-4" />,
-    iconBgClassName: "bg-green-base",
-    description: "Freelance",
-    date: "24/11/25",
-    category: "Salário",
-    categoryVariant: "green",
-    type: "entrada",
-    amount: 1200,
-  },
-  {
-    id: "7",
-    icon: <Film className="size-4" />,
-    iconBgClassName: "bg-pink-base",
-    description: "Cinema",
-    date: "23/11/25",
-    category: "Entretenimento",
-    categoryVariant: "pink",
-    type: "saida",
-    amount: -65,
-  },
-  {
-    id: "8",
-    icon: <UtensilsCrossed className="size-4" />,
-    iconBgClassName: "bg-blue-base",
-    description: "Almoço delivery",
-    date: "22/11/25",
-    category: "Alimentação",
-    categoryVariant: "blue",
-    type: "saida",
-    amount: -42,
-  },
-  {
-    id: "9",
-    icon: <Fuel className="size-4" />,
-    iconBgClassName: "bg-purple-base",
-    description: "Uber",
-    date: "21/11/25",
-    category: "Transporte",
-    categoryVariant: "purple",
-    type: "saida",
-    amount: -28.5,
-  },
-  {
-    id: "10",
-    icon: <ShoppingCart className="size-4" />,
-    iconBgClassName: "bg-orange-base",
-    description: "Supermercado",
-    date: "20/11/25",
-    category: "Mercado",
-    categoryVariant: "orange",
-    type: "saida",
-    amount: -185.9,
-  },
-  {
-    id: "11",
-    icon: <Leaf className="size-4" />,
-    iconBgClassName: "bg-green-base",
-    description: "Dividendos",
-    date: "19/11/25",
-    category: "Investimento",
-    categoryVariant: "green",
-    type: "entrada",
-    amount: 95,
-  },
-  {
-    id: "12",
-    icon: <Home className="size-4" />,
-    iconBgClassName: "bg-orange-base",
-    description: "Conta de luz",
-    date: "18/11/25",
-    category: "Utilidades",
-    categoryVariant: "yellow",
-    type: "saida",
-    amount: -210,
-  },
-  {
-    id: "13",
-    icon: <Briefcase className="size-4" />,
-    iconBgClassName: "bg-green-base",
-    description: "Pagamento de Salário",
-    date: "15/11/25",
-    category: "Salário",
-    categoryVariant: "green",
-    type: "entrada",
-    amount: 4250,
-  },
-  {
-    id: "14",
-    icon: <Film className="size-4" />,
-    iconBgClassName: "bg-pink-base",
-    description: "Streaming",
-    date: "14/11/25",
-    category: "Entretenimento",
-    categoryVariant: "pink",
-    type: "saida",
-    amount: -39.9,
-  },
-  {
-    id: "15",
-    icon: <UtensilsCrossed className="size-4" />,
-    iconBgClassName: "bg-blue-base",
-    description: "Café",
-    date: "13/11/25",
-    category: "Alimentação",
-    categoryVariant: "blue",
-    type: "saida",
-    amount: -18,
-  },
-  {
-    id: "16",
-    icon: <Fuel className="size-4" />,
-    iconBgClassName: "bg-purple-base",
-    description: "Estacionamento",
-    date: "12/11/25",
-    category: "Transporte",
-    categoryVariant: "purple",
-    type: "saida",
-    amount: -35,
-  },
-  {
-    id: "17",
-    icon: <ShoppingCart className="size-4" />,
-    iconBgClassName: "bg-orange-base",
-    description: "Farmácia",
-    date: "11/11/25",
-    category: "Mercado",
-    categoryVariant: "orange",
-    type: "saida",
-    amount: -78.5,
-  },
-  {
-    id: "18",
-    icon: <Leaf className="size-4" />,
-    iconBgClassName: "bg-green-base",
-    description: "Aplicação",
-    date: "10/11/25",
-    category: "Investimento",
-    categoryVariant: "green",
-    type: "saida",
-    amount: -500,
-  },
-  {
-    id: "19",
-    icon: <Home className="size-4" />,
-    iconBgClassName: "bg-orange-base",
-    description: "Internet",
-    date: "09/11/25",
-    category: "Utilidades",
-    categoryVariant: "yellow",
-    type: "saida",
-    amount: -99.9,
-  },
-  {
-    id: "20",
-    icon: <Briefcase className="size-4" />,
-    iconBgClassName: "bg-green-base",
-    description: "Consultoria",
-    date: "08/11/25",
-    category: "Salário",
-    categoryVariant: "green",
-    type: "entrada",
-    amount: 800,
-  },
-  {
-    id: "21",
-    icon: <Film className="size-4" />,
-    iconBgClassName: "bg-pink-base",
-    description: "Show",
-    date: "07/11/25",
-    category: "Entretenimento",
-    categoryVariant: "pink",
-    type: "saida",
-    amount: -120,
-  },
-  {
-    id: "22",
-    icon: <UtensilsCrossed className="size-4" />,
-    iconBgClassName: "bg-blue-base",
-    description: "Jantar",
-    date: "06/11/25",
-    category: "Alimentação",
-    categoryVariant: "blue",
-    type: "saida",
-    amount: -95,
-  },
-  {
-    id: "23",
-    icon: <Fuel className="size-4" />,
-    iconBgClassName: "bg-purple-base",
-    description: "Manutenção carro",
-    date: "05/11/25",
-    category: "Transporte",
-    categoryVariant: "purple",
-    type: "saida",
-    amount: -320,
-  },
-  {
-    id: "24",
-    icon: <ShoppingCart className="size-4" />,
-    iconBgClassName: "bg-orange-base",
-    description: "Padaria",
-    date: "04/11/25",
-    category: "Mercado",
-    categoryVariant: "orange",
-    type: "saida",
-    amount: -45,
-  },
-  {
-    id: "25",
-    icon: <Leaf className="size-4" />,
-    iconBgClassName: "bg-green-base",
-    description: "Resgate investimento",
-    date: "03/11/25",
-    category: "Investimento",
-    categoryVariant: "green",
-    type: "entrada",
-    amount: 1500,
-  },
-  {
-    id: "26",
-    icon: <Home className="size-4" />,
-    iconBgClassName: "bg-orange-base",
-    description: "Água",
-    date: "02/11/25",
-    category: "Utilidades",
-    categoryVariant: "yellow",
-    type: "saida",
-    amount: -65,
-  },
-  {
-    id: "27",
-    icon: <Briefcase className="size-4" />,
-    iconBgClassName: "bg-green-base",
-    description: "Bônus",
-    date: "01/11/25",
-    category: "Salário",
-    categoryVariant: "green",
-    type: "entrada",
-    amount: 500,
-  },
-];
+import { useQuery } from "@apollo/client/react";
+import {
+  LIST_TRANSACTIONS,
+  ListTransactionsQuery,
+} from "@/lib/graphql/queries/ListTransactions";
+import { UpdateTransaction } from "@/components/modals/UpdateTransaction";
+import { Transaction } from "@/types/transaction";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export function Transactions() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<Transaction | null>(null);
+  const { data, refetch } = useQuery<ListTransactionsQuery>(LIST_TRANSACTIONS);
+
+  const transactions = data?.listTransactions || [];
+
+  const categories =
+    Array.from(
+      new Set(
+        data?.listTransactions.map((transaction) => transaction.category),
+      ).values(),
+    ) || [];
+
+  const openUpdateModal = (id: string) => {
+    const foundTransaction = transactions.find(
+      (transaction) => transaction.id === id,
+    );
+    if (!foundTransaction) return;
+    setSelectedTransaction(foundTransaction);
+    setUpdateModalOpen(true);
+  };
+
+  const handleCreateModalOpenChange = (open: boolean) => {
+    navigate(`/transactions${open ? "?op=create" : ""}`);
+  };
+
+  useEffect(() => {
+    setCreateModalOpen(searchParams.get("op") === "create");
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="mx-auto max-w-6xl px-6 py-8">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">Transações</h1>
-            <p className="mt-1 text-sm text-gray-400">
+            <h1 className="text-2xl font-bold">Transações</h1>
+            <p className="mt-1 text-sm text-gray-500">
               Gerencie todas as suas transações financeiras
             </p>
           </div>
@@ -339,7 +69,7 @@ export function Transactions() {
             type="button"
             className="shrink-0 shadow-sm"
             leftIcon={<span className="text-lg leading-none">+</span>}
-            onClick={() => setCreateModalOpen(true)}
+            onClick={() => handleCreateModalOpenChange(true)}
           >
             Nova transação
           </Button>
@@ -347,7 +77,19 @@ export function Transactions() {
 
         <CreateTransaction
           open={createModalOpen}
-          onOpenChange={setCreateModalOpen}
+          onOpenChange={handleCreateModalOpenChange}
+          onSubmitted={refetch}
+        />
+
+        <UpdateTransaction
+          key={selectedTransaction?.id}
+          open={updateModalOpen}
+          onOpenChange={setUpdateModalOpen}
+          onSubmitted={() => {
+            refetch();
+            setSelectedTransaction(null);
+          }}
+          transaction={selectedTransaction}
         />
 
         <div className="mb-6 rounded-xl border border-gray-200 bg-neutral-white p-5 shadow-sm">
@@ -363,8 +105,8 @@ export function Transactions() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
-                <SelectItem value="entrada">Entrada</SelectItem>
-                <SelectItem value="saida">Saída</SelectItem>
+                <SelectItem value="income">Entrada</SelectItem>
+                <SelectItem value="expense">Saída</SelectItem>
               </SelectContent>
             </Select>
             <Select defaultValue="todas">
@@ -373,29 +115,32 @@ export function Transactions() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todas">Todas</SelectItem>
-                <SelectItem value="alimentacao">Alimentação</SelectItem>
-                <SelectItem value="transporte">Transporte</SelectItem>
-                <SelectItem value="mercado">Mercado</SelectItem>
-                <SelectItem value="investimento">Investimento</SelectItem>
-                <SelectItem value="utilidades">Utilidades</SelectItem>
-                <SelectItem value="salario">Salário</SelectItem>
-                <SelectItem value="entretenimento">Entretenimento</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.title}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
-            <Select defaultValue="nov-2025">
+            <Select defaultValue="feb-2026">
               <SelectTrigger label="Período">
                 <SelectValue placeholder="Período" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="nov-2025">Novembro / 2025</SelectItem>
-                <SelectItem value="out-2025">Outubro / 2025</SelectItem>
-                <SelectItem value="set-2025">Setembro / 2025</SelectItem>
+                <SelectItem value="feb-2026">Fevereiro / 2026</SelectItem>
+                <SelectItem value="mar-2026">Março / 2026</SelectItem>
+                <SelectItem value="apr-2026">Abril / 2026</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
 
-        <TransactionsTable transactions={mockTransactions} pageSize={10} />
+        <TransactionsTable
+          transactions={transactions}
+          pageSize={10}
+          onUpdate={openUpdateModal}
+          onDelete={refetch}
+        />
       </div>
     </div>
   );

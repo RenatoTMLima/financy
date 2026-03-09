@@ -1,6 +1,4 @@
-import * as React from "react";
-import { Minus, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, parseInputDate, parseOutputDate } from "@/lib/utils";
 import {
   Modal,
   ModalContent,
@@ -17,43 +15,75 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useState } from "react";
+import {
+  UpsertTransactionInput,
+  Transaction,
+  TransactionType,
+} from "@/types/transaction";
+import {
+  LIST_CATEGORIES_ONLY,
+  ListCategoriesOnlyQuery,
+} from "@/lib/graphql/queries/ListCategories";
+import { useQuery } from "@apollo/client/react";
+import { Icon } from "../ui/icon";
 
-export type TransactionType = "expense" | "income";
+type TransactionModalBaseProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  initialData?: Transaction;
+  onSubmit: (data: UpsertTransactionInput) => Promise<void>;
+  isSubmitting: boolean;
+  locales: {
+    title: string;
+    description: string;
+  };
+};
 
-export interface CreateTransactionProps {
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
-}
+export function TransactionModalBase(data: TransactionModalBaseProps) {
+  const { locales, initialData, onSubmit, open, onOpenChange, isSubmitting } =
+    data;
 
-const categoryOptions = [
-  { value: "alimentacao", label: "Alimentação" },
-  { value: "transporte", label: "Transporte" },
-  { value: "mercado", label: "Mercado" },
-  { value: "investimento", label: "Investimento" },
-  { value: "utilidades", label: "Utilidades" },
-  { value: "salario", label: "Salário" },
-  { value: "entretenimento", label: "Entretenimento" },
-];
+  const [type, setType] = useState<TransactionType>(
+    initialData?.type || "expense",
+  );
+  const [title, setTitle] = useState(initialData?.title || "");
+  const [amount, setAmount] = useState(initialData?.amount || 0);
+  const [date, setDate] = useState(initialData?.date || "");
+  const [category, setCategory] = useState(initialData?.category.id || "");
 
-export function CreateTransaction({
-  open = false,
-  onOpenChange,
-}: CreateTransactionProps) {
-  const [type, setType] = React.useState<TransactionType>("expense");
+  const { data: categoriesData } =
+    useQuery<ListCategoriesOnlyQuery>(LIST_CATEGORIES_ONLY);
+  const categories = categoriesData?.listCategories || [];
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await onSubmit({
+      title,
+      amount,
+      date,
+      type,
+      categoryId: category,
+    });
+    setTitle("");
+    setAmount(0);
+    setDate("");
+    setCategory("");
+    setType("expense");
+  };
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent className="max-w-xl rounded-xl border-gray-200 p-6 shadow-lg">
         <ModalHeader className="space-y-1">
           <ModalTitle className="text-xl font-semibold text-gray-900">
-            Nova transação
+            {locales.title}
           </ModalTitle>
           <ModalDescription className="text-sm text-gray-600">
-            Registre sua despesa ou receita
+            {locales.description}
           </ModalDescription>
         </ModalHeader>
 
-        {/* Transaction type toggle */}
         <div
           className="grid grid-cols-2 gap-0 rounded-md bg-gray-100 p-1"
           role="tablist"
@@ -68,18 +98,13 @@ export function CreateTransaction({
               "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-gray-900 transition-colors",
               type === "expense"
                 ? "border border-red-base bg-white"
-                : "border border-transparent bg-transparent hover:bg-gray-200/80"
+                : "border border-transparent bg-transparent hover:bg-gray-200/80",
             )}
           >
-            <span
-              className={cn(
-                "flex size-6 shrink-0 items-center justify-center rounded-full",
-                type === "expense" ? "bg-red-base" : "bg-gray-500"
-              )}
-              aria-hidden
-            >
-              <Minus className="size-3.5 text-white" strokeWidth={2.5} />
-            </span>
+            <Icon
+              id="circle-arrow-down"
+              className={type === "expense" ? "text-red-base" : "text-gray-500"}
+            />
             Despesa
           </button>
           <button
@@ -91,31 +116,26 @@ export function CreateTransaction({
               "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-gray-900 transition-colors",
               type === "income"
                 ? "border border-green-base bg-white"
-                : "border border-transparent bg-transparent hover:bg-gray-200/80"
+                : "border border-transparent bg-transparent hover:bg-gray-200/80",
             )}
           >
-            <span
-              className={cn(
-                "flex size-6 shrink-0 items-center justify-center rounded-full",
-                type === "income" ? "bg-green-base" : "bg-gray-500"
-              )}
-              aria-hidden
-            >
-              <Plus className="size-3.5 text-white" strokeWidth={2.5} />
-            </span>
+            <Icon
+              id="circle-arrow-up"
+              className={
+                type === "income" ? "text-green-base" : "text-gray-500"
+              }
+            />
             Receita
           </button>
         </div>
 
-        {/* Form fields */}
-        <form
-          className="flex flex-col gap-4"
-          onSubmit={(e) => e.preventDefault()}
-        >
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <Input
             label="Descrição"
             placeholder="Ex. Almoço no restaurante"
             autoComplete="off"
+            onChange={(e) => setTitle(e.target.value)}
+            value={title}
           />
 
           <div className="grid grid-cols-2 gap-4">
@@ -124,6 +144,11 @@ export function CreateTransaction({
               type="date"
               placeholder="Selecione"
               className="[&_input]:text-gray-500 [&_input]:placeholder:text-gray-400"
+              onChange={(e) => {
+                console.log("DATE", new Date(e.target.value).toISOString());
+                setDate(parseInputDate(e.target.value));
+              }}
+              value={date ? parseOutputDate(date) : ""}
             />
             <Input
               label="Valor"
@@ -131,17 +156,22 @@ export function CreateTransaction({
               inputMode="decimal"
               placeholder="R$ 0,00"
               autoComplete="off"
+              onChange={(e) => setAmount(Number(e.target.value))}
+              value={amount}
             />
           </div>
 
-          <Select>
+          <Select
+            onValueChange={(value) => setCategory(value)}
+            value={category}
+          >
             <SelectTrigger label="Categoria">
               <SelectValue placeholder="Selecione" />
             </SelectTrigger>
             <SelectContent>
-              {categoryOptions.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label}
+              {categories.map((opt) => (
+                <SelectItem key={opt.id} value={opt.id}>
+                  {opt.title}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -150,6 +180,7 @@ export function CreateTransaction({
           <Button
             type="submit"
             className="w-full bg-green-dark font-semibold text-white hover:bg-green-base focus-visible:ring-green-base"
+            disabled={isSubmitting}
           >
             Salvar
           </Button>

@@ -12,11 +12,11 @@ export function SummaryCard({ title, amount, className }: SummaryCardProps) {
   return (
     <div
       className={cn(
-        "rounded-xl border border-gray-200 bg-gray-100 p-5",
-        className
+        "rounded-xl border border-gray-200 bg-neutral-white p-6",
+        className,
       )}
     >
-      <div className="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-gray-700">
+      <div className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-gray-500">
         {title}
       </div>
       <p className="text-2xl font-bold text-gray-800">

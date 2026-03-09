@@ -18,24 +18,27 @@ export function CategorySummaryCard({
   categoryName,
   className,
 }: CategorySummaryCardProps) {
-  const mainContent = categoryName ?? (value !== undefined ? String(value) : null);
+  const mainContent =
+    categoryName ?? (value !== undefined ? String(value) : null);
 
   return (
     <div
       className={cn(
-        "rounded-xl border border-gray-200 bg-neutral-white p-5 shadow-sm",
-        className
+        "rounded-xl border border-gray-200 bg-neutral-white p-5 shadow-sm flex gap-3",
+        className,
       )}
     >
-      <div className="mb-2 flex items-center gap-2 text-gray-500">
-        {icon}
+      <div className="pt-1.5 flex gap-2 text-gray-500">{icon}</div>
+      <div className="flex flex-col">
+        {mainContent !== null && (
+          <p className="text-2xl font-bold text-gray-800 flex items-center">
+            {mainContent}
+          </p>
+        )}
+        <p className="mt-1 text-xs font-medium uppercase tracking-wide text-gray-500">
+          {label}
+        </p>
       </div>
-      {mainContent !== null && (
-        <p className="text-2xl font-bold text-gray-800">{mainContent}</p>
-      )}
-      <p className="mt-1 text-xs font-medium uppercase tracking-wide text-gray-500">
-        {label}
-      </p>
     </div>
   );
 }

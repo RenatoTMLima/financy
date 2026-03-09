@@ -1,98 +1,53 @@
-import { useState } from "react";
-import {
-  FolderOpen,
-  ArrowUpDown,
-  UtensilsCrossed,
-  Film,
-  TrendingUp,
-  ShoppingCart,
-  Briefcase,
-  HeartPulse,
-  Fuel,
-  Zap,
-} from "lucide-react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CreateCategory } from "@/components/CreateCategory";
+import { CreateCategory } from "@/components/modals/CreateCategory";
 import { CategorySummaryCard } from "./CategorySummaryCard";
 import { CategoryCard } from "./CategoryCard";
-import type { TagVariant } from "@/components/ui/tag";
-
-const categories: Array<{
-  id: string;
-  icon: React.ReactNode;
-  variant: TagVariant;
-  title: string;
-  description: string;
-  itemCount: number;
-}> = [
-  {
-    id: "1",
-    icon: <UtensilsCrossed className="size-5" />,
-    variant: "blue",
-    title: "Alimentação",
-    description: "Restaurantes, delivery e refeições",
-    itemCount: 12,
-  },
-  {
-    id: "2",
-    icon: <Film className="size-5" />,
-    variant: "pink",
-    title: "Entretenimento",
-    description: "Cinema, jogos e lazer",
-    itemCount: 2,
-  },
-  {
-    id: "3",
-    icon: <TrendingUp className="size-5" />,
-    variant: "green",
-    title: "Investimento",
-    description: "Aplicações e retornos financeiros",
-    itemCount: 1,
-  },
-  {
-    id: "4",
-    icon: <ShoppingCart className="size-5" />,
-    variant: "orange",
-    title: "Mercado",
-    description: "Compras de supermercado e mantimentos",
-    itemCount: 3,
-  },
-  {
-    id: "5",
-    icon: <Briefcase className="size-5" />,
-    variant: "green",
-    title: "Salário",
-    description: "Renda mensal e bonificações",
-    itemCount: 3,
-  },
-  {
-    id: "6",
-    icon: <HeartPulse className="size-5" />,
-    variant: "red",
-    title: "Saúde",
-    description: "Medicamentos, consultas e exames",
-    itemCount: 0,
-  },
-  {
-    id: "7",
-    icon: <Fuel className="size-5" />,
-    variant: "purple",
-    title: "Transporte",
-    description: "Gasolina, transporte público e viagens",
-    itemCount: 8,
-  },
-  {
-    id: "8",
-    icon: <Zap className="size-5" />,
-    variant: "yellow",
-    title: "Utilidades",
-    description: "Energia, água, internet e telefone",
-    itemCount: 7,
-  },
-];
+import { useQuery } from "@apollo/client/react";
+import {
+  LIST_CATEGORIES,
+  ListCategoriesQuery,
+} from "@/lib/graphql/queries/ListCategories";
+import { UpdateCategory } from "@/components/modals/UpdateCategory";
+import { Category } from "@/types/category";
+import { Icon } from "@/components/ui/icon";
 
 export function Categories() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null,
+  );
+  const { data, refetch } = useQuery<ListCategoriesQuery>(LIST_CATEGORIES);
+
+  const categories = data?.listCategories || [];
+
+  const summary = useMemo(() => {
+    if (!categories.length)
+      return {
+        totalCategories: 0,
+        totalTransactions: 0,
+        mostUsedCategory: "",
+      };
+
+    return {
+      totalCategories: categories.length,
+      totalTransactions: categories.reduce(
+        (acc, cat) => acc + cat.transactions.length,
+        0,
+      ),
+      mostUsedCategory: categories.reduce((acc, cat) =>
+        acc.transactions.length > cat.transactions.length ? acc : cat,
+      )?.title,
+    };
+  }, [categories]);
+
+  const openEditModal = (id: string) => {
+    const foundCategory = categories.find((cat) => cat.id === id);
+    if (!foundCategory) return;
+    setSelectedCategory(foundCategory);
+    setEditModalOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -117,23 +72,35 @@ export function Categories() {
         <CreateCategory
           open={createModalOpen}
           onOpenChange={setCreateModalOpen}
+          onSubmitted={refetch}
+        />
+
+        <UpdateCategory
+          key={selectedCategory?.id}
+          open={editModalOpen}
+          onOpenChange={setEditModalOpen}
+          onSubmitted={() => {
+            refetch();
+            setSelectedCategory(null);
+          }}
+          category={selectedCategory}
         />
 
         <section className="mb-8 grid gap-4 sm:grid-cols-3">
           <CategorySummaryCard
-            icon={<FolderOpen className="size-5 text-gray-400" />}
+            icon={<Icon id="tag" className="text-gray-700" />}
             label="Total de categorias"
-            value={8}
+            value={summary.totalCategories}
           />
           <CategorySummaryCard
-            icon={<ArrowUpDown className="size-5 text-gray-400" />}
+            icon={<Icon id="arrow-up-down" className="text-purple-base" />}
             label="Total de transações"
-            value={27}
+            value={summary.totalTransactions}
           />
           <CategorySummaryCard
-            icon={<UtensilsCrossed className="size-5 text-blue-base" />}
+            icon={<Icon id="utensils" className="text-blue-base" />}
             label="Categoria mais utilizada"
-            categoryName="Alimentação"
+            categoryName={summary.mostUsedCategory}
           />
         </section>
 
@@ -141,11 +108,9 @@ export function Categories() {
           {categories.map((cat) => (
             <CategoryCard
               key={cat.id}
-              icon={cat.icon}
-              variant={cat.variant}
-              title={cat.title}
-              description={cat.description}
-              itemCount={cat.itemCount}
+              category={cat}
+              onDeleted={refetch}
+              openEditModal={openEditModal}
             />
           ))}
         </section>
